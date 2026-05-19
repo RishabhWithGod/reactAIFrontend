@@ -5,11 +5,29 @@ import path from 'node:path'
 export default defineConfig({
   plugins: [react()],
 
-  base: '/client/design/breeze/ai-frontend/',
+  // IMPORTANT
+  // keep root routing stable
+  // base: '/',
+    base: '/client/design/breeze/ai-frontend/',
 
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
+      '@': path.resolve(
+        __dirname,
+        './src',
+      ),
+    },
+  },
+
+  server: {
+    proxy: {
+      '/api': {
+        target:
+          'https://electricai-production-5b6a.up.railway.app',
+
+        changeOrigin: true,
+        secure: true,
+      },
     },
   },
 })

@@ -126,8 +126,8 @@ export function ResultsPage() {
         </>
       }
     >
-      <div className="grid gap-6 md:grid-cols-3">
-        <StatCard
+      <div className="grid gap-6 md:grid-cols-3 mb-5">
+        <StatCard 
           icon={Layers3}
           label="Total components"
           value={formatNumber(activeRecord.summary.totalComponents)}
@@ -147,31 +147,88 @@ export function ResultsPage() {
         />
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
+      <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr] mb-5">
         <DrawingPreview drawingName={activeRecord.drawingName} previewUrl={previewUrl} pages={activeRecord.pages} />
-        <Card>
-          <CardContent className="p-6">
-            <SectionTitle
-              eyebrow="Session Metadata"
-              title="Analysis summary"
-              description="Use the exports for downstream estimation workflows, audit the detected components, or revisit page-level AI signals."
-            />
-            <div className="mt-6 grid gap-4 sm:grid-cols-2">
-              <div className="rounded-[24px] border border-white/10 bg-white/4 p-5">
-                <p className="text-xs uppercase tracking-[0.16em] text-sky-200/70">Source mode</p>
-                <p className="mt-2 font-medium text-white">{activeRecord.source === 'backend' ? 'Backend-synced result' : 'Local upload result'}</p>
-              </div>
-              <div className="rounded-[24px] border border-white/10 bg-white/4 p-5">
-                <p className="text-xs uppercase tracking-[0.16em] text-sky-200/70">Backend drawing id</p>
-                <p className="mt-2 font-medium text-white">{activeRecord.backendDrawingId ?? 'Legacy upload flow'}</p>
-              </div>
-              <div className="rounded-[24px] border border-white/10 bg-white/4 p-5 sm:col-span-2">
-                <p className="text-xs uppercase tracking-[0.16em] text-sky-200/70">Generated summary</p>
-                <p className="mt-2 text-sm leading-6 text-slate-300">{activeRecord.summary.humanReadable}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+       <Card
+  className="
+    rounded-[32px]
+    border
+    border-white/10
+    bg-[#6d8fd0]/20
+    shadow-[0_8px_40px_rgba(0,0,0,0.12)]
+    backdrop-blur-md
+  "
+>
+  <CardContent className="p-8">
+    <SectionTitle
+      eyebrow="Session Metadata"
+      title="Analysis Summary"
+      description="Use the exports for downstream estimation workflows, audit the detected components, or revisit page-level AI signals."
+    />
+
+    <div className="mt-6 grid gap-4 sm:grid-cols-2">
+
+      <div
+        className="
+          rounded-[24px]
+          border
+          border-white/10
+          bg-[#7394cf]/18
+          p-5
+        "
+      >
+        <p className="text-xs uppercase tracking-[0.16em] text-cyan-100/70">
+          Source Mode
+        </p>
+
+        <p className="mt-2 font-medium text-white">
+          {activeRecord.source === 'backend'
+            ? 'Backend-synced result'
+            : 'Local upload result'}
+        </p>
+      </div>
+
+      <div
+        className="
+          rounded-[24px]
+          border
+          border-white/10
+          bg-[#7394cf]/18
+          p-5
+        "
+      >
+        <p className="text-xs uppercase tracking-[0.16em] text-cyan-100/70">
+          Backend Drawing ID
+        </p>
+
+        <p className="mt-2 font-medium text-white">
+          {activeRecord.backendDrawingId ??
+            'Legacy upload flow'}
+        </p>
+      </div>
+
+      <div
+        className="
+          rounded-[24px]
+          border
+          border-white/10
+          bg-[#7394cf]/18
+          p-5
+          sm:col-span-2
+        "
+      >
+        <p className="text-xs uppercase tracking-[0.16em] text-cyan-100/70">
+          Generated Summary
+        </p>
+
+        <p className="mt-2 text-sm leading-7 text-white/75">
+          {activeRecord.summary.humanReadable}
+        </p>
+      </div>
+
+    </div>
+  </CardContent>
+</Card>
       </div>
 
       <Tabs defaultValue="components">
@@ -192,7 +249,14 @@ export function ResultsPage() {
         </TabsContent>
 
         <TabsContent value="pages">
-          <Card>
+          <Card className="
+              rounded-[32px]
+              border
+              border-white/10
+              bg-[#6d8fd0]/20
+              shadow-[0_8px_40px_rgba(0,0,0,0.12)]
+              backdrop-blur-md
+            ">
             <CardContent className="grid gap-4 p-6 md:grid-cols-2">
               {activeRecord.pages.map((page) => (
                 <div key={page.pageNumber} className="rounded-[24px] border border-white/10 bg-white/4 p-5">
@@ -209,7 +273,15 @@ export function ResultsPage() {
         </TabsContent>
 
         <TabsContent value="json">
-          <Card>
+          <Card
+          className="
+            rounded-[32px]
+            border
+            border-white/10
+            bg-[#6d8fd0]/20
+            shadow-[0_8px_40px_rgba(0,0,0,0.12)]
+            backdrop-blur-md
+          ">
             <CardContent className="p-0">
               <ScrollArea className="h-[520px]">
                 <pre className="p-6 text-sm leading-7 text-slate-300">{JSON.stringify(activeRecord.raw, null, 2)}</pre>
@@ -219,7 +291,7 @@ export function ResultsPage() {
         </TabsContent>
       </Tabs>
 
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap gap-3 mt-5 mb-5">
         <Button asChild variant="secondary">
           <Link to="/history">
             <Download className="mr-2 h-4 w-4" />

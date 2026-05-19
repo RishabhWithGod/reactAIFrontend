@@ -41,6 +41,8 @@ export function stageLabel(stage: AnalysisStage) {
       return 'Counting quantities'
     case 'boq_generation':
       return 'Generating BOQ'
+    case 'cost_estimation':
+      return 'Estimating costs'
     case 'complete':
       return 'Analysis complete'
     case 'error':

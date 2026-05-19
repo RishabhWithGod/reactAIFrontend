@@ -57,6 +57,8 @@ export default {
       backgroundImage: {
         spotlight:
           'radial-gradient(circle at top, rgba(56, 189, 248, 0.18), transparent 36%), radial-gradient(circle at bottom right, rgba(14, 165, 233, 0.16), transparent 26%)',
+        'auth-radial':
+          'radial-gradient(circle at 70% 10%, rgba(51, 227, 255, 0.22), transparent 28%), radial-gradient(circle at 22% 88%, rgba(13, 87, 161, 0.38), transparent 32%), linear-gradient(135deg, #06070f 0%, #0d57a1 54%, #070f51 100%)',
       },
       keyframes: {
         float: {

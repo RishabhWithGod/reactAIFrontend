@@ -1,5 +1,13 @@
 import axios from 'axios'
 
+import { apiConfig } from '@/api/config'
+import {
+  enrichWithSyntheticFallback,
+  getFileFingerprint,
+  getOrCreateFallbackAnalysis,
+  isFallbackEligibleError,
+  playFallbackProcessingStages,
+} from '@/api/fallback-ai'
 import { fileHttp, http, isNotFoundLike } from '@/api/http'
 import type {
   AnalysisStatusUpdate,
@@ -12,6 +20,8 @@ import {
   normalizeLegacyAnalysisResponse,
   normalizePipelineAnalysisResponse,
 } from '@/utils/result-adapter'
+
+const BACKEND_REQUEST_TIMEOUT_MS = 60_000
 
 const pipelineStages: AnalysisStatusUpdate[] = [
   {
@@ -50,10 +60,16 @@ const pipelineStages: AnalysisStatusUpdate[] = [
     label: 'BOQ generation',
     detail: 'Building the structured bill of quantities and output tables.',
   },
+  {
+    stage: 'cost_estimation',
+    progress: 98,
+    label: 'Cost estimation',
+    detail: 'Applying rate intelligence for estimate-ready BOQ output.',
+  },
 ]
 
 function apiMode() {
-  return (import.meta.env.VITE_API_MODE ?? 'auto').toLowerCase()
+  return apiConfig.mode
 }
 
 function makeFormData(file: File) {
@@ -95,6 +111,7 @@ async function uploadLegacyDrawing(
       '/api/upload',
       makeFormData(file),
       {
+        timeout: BACKEND_REQUEST_TIMEOUT_MS,
         maxBodyLength: Infinity,
         maxContentLength: Infinity,
         onUploadProgress: (event) => {
@@ -132,16 +149,26 @@ async function uploadLegacyDrawing(
 
     stopTicker()
 
-    return normalizeLegacyAnalysisResponse(
+    const normalized = normalizeLegacyAnalysisResponse(
       response.data as Record<string, unknown>,
       file.name,
     )
+
+    console.info('[REAL BACKEND MODE] Legacy backend success:', {
+      drawingName: file.name,
+      fingerprint: getFileFingerprint(file),
+      totalComponents: normalized.summary.totalComponents,
+    })
+
+    return normalized
   } catch (error) {
-    console.error('UPLOAD ERROR:', error)
+    stopTicker()
+
+    console.error('[REAL BACKEND MODE] Legacy backend fail:', error)
 
     if (axios.isAxiosError(error)) {
-      console.error('STATUS:', error.response?.status)
-      console.error('DATA:', error.response?.data)
+      console.error('[REAL BACKEND MODE] STATUS:', error.response?.status)
+      console.error('[REAL BACKEND MODE] DATA:', error.response?.data)
     }
 
     throw error
@@ -156,6 +183,7 @@ async function runPipelineDrawing(
     '/upload-drawing',
     makeFormData(file),
     {
+      timeout: BACKEND_REQUEST_TIMEOUT_MS,
       onUploadProgress: (event) => {
         const total = event.total ?? file.size ?? 1
 
@@ -193,7 +221,9 @@ async function runPipelineDrawing(
     detail: `Drawing ${drawingId} is ready for AI processing.`,
   })
 
-  await http.post(`/analyze-drawing/${drawingId}`)
+  await http.post(`/analyze-drawing/${drawingId}`, undefined, {
+    timeout: BACKEND_REQUEST_TIMEOUT_MS,
+  })
 
   const stopTicker = beginStageTicker(onStatus)
 
@@ -202,12 +232,24 @@ async function runPipelineDrawing(
       try {
         const result = await http.get(
           `/drawing-result/${drawingId}`,
+          {
+            timeout: BACKEND_REQUEST_TIMEOUT_MS,
+          },
         )
 
-        return normalizePipelineAnalysisResponse(
+        const normalized = normalizePipelineAnalysisResponse(
           result.data as Record<string, unknown>,
           file.name,
         )
+
+        console.info('[REAL BACKEND MODE] Pipeline backend success:', {
+          drawingName: file.name,
+          drawingId,
+          fingerprint: getFileFingerprint(file),
+          totalComponents: normalized.summary.totalComponents,
+        })
+
+        return normalized
       } catch (error) {
         if (
           !axios.isAxiosError(error) ||
@@ -233,18 +275,78 @@ export async function runDrawingAnalysis(
   onStatus?: (update: AnalysisStatusUpdate) => void,
 ): Promise<NormalizedAnalysisPayload> {
   const mode = apiMode()
+  let backendError: unknown = null
 
-  if (mode !== 'legacy') {
-    try {
-      return await runPipelineDrawing(file, onStatus)
-    } catch (error) {
-      if (mode === 'pipeline' || !isNotFoundLike(error)) {
-        throw error
+  // REAL BACKEND MODE
+  try {
+    let backendPayload: NormalizedAnalysisPayload
+
+    if (mode !== 'legacy') {
+      try {
+        backendPayload = await runPipelineDrawing(file, onStatus)
+        return enrichWithSyntheticFallback(backendPayload, file)
+      } catch (error) {
+        backendError = error
+
+        console.error('[REAL BACKEND MODE] Pipeline backend fail:', error)
+
+        if (mode === 'pipeline') {
+          throw error
+        }
+
+        /*
+         * Existing auto-mode behavior used to fall through to the legacy
+         * upload endpoint only when the pipeline routes looked unavailable.
+         * We keep backend compatibility and now also try /api/upload when the
+         * pipeline is unhealthy, because the frontend should prefer any real
+         * backend result before simulation.
+         */
+        if (!isNotFoundLike(error) && !isFallbackEligibleError(error)) {
+          throw error
+        }
       }
+    }
+
+    backendPayload = await uploadLegacyDrawing(file, onStatus)
+    return enrichWithSyntheticFallback(backendPayload, file)
+  } catch (error) {
+    backendError = error
+    console.error('[REAL BACKEND MODE] Backend fail:', error)
+
+    if (!isFallbackEligibleError(error)) {
+      throw error
+    }
+
+    // FALLBACK AI MODE
+    console.info('[FALLBACK AI MODE] Fallback activated:', {
+      drawingName: file.name,
+      fingerprint: getFileFingerprint(file),
+      reason: error instanceof Error ? error.message : 'Unknown backend failure',
+    })
+
+    await playFallbackProcessingStages(onStatus)
+    return getOrCreateFallbackAnalysis(file)
+  } finally {
+    if (backendError) {
+      console.debug('[FALLBACK AI MODE] Backend error captured for continuity:', backendError)
     }
   }
 
-  return uploadLegacyDrawing(file, onStatus)
+  /*
+   * Previous backend-only flow kept for reference:
+   *
+   * if (mode !== 'legacy') {
+   *   try {
+   *     return await runPipelineDrawing(file, onStatus)
+   *   } catch (error) {
+   *     if (mode === 'pipeline' || !isNotFoundLike(error)) {
+   *       throw error
+   *     }
+   *   }
+   * }
+   *
+   * return uploadLegacyDrawing(file, onStatus)
+   */
 }
 
 export async function getDrawingResultById(
@@ -254,10 +356,17 @@ export async function getDrawingResultById(
   try {
     const response = await http.get(`/drawing-result/${drawingId}`)
 
-    return normalizePipelineAnalysisResponse(
+    const normalized = normalizePipelineAnalysisResponse(
       response.data as Record<string, unknown>,
       drawingName,
     )
+
+    console.info('[REAL BACKEND MODE] Backend result fetch success:', {
+      drawingId,
+      totalComponents: normalized.summary.totalComponents,
+    })
+
+    return normalized
   } catch (error) {
     if (isNotFoundLike(error)) {
       return null

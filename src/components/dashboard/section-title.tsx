@@ -7,15 +7,64 @@ interface SectionTitleProps {
   action?: ReactNode
 }
 
-export function SectionTitle({ eyebrow, title, description, action }: SectionTitleProps) {
+export function SectionTitle({
+  eyebrow,
+  title,
+  description,
+  action,
+}: SectionTitleProps) {
   return (
     <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+
       <div>
-        {eyebrow ? <p className="text-xs uppercase tracking-[0.24em] text-sky-200/70">{eyebrow}</p> : null}
-        <h3 className="mt-1 font-display text-xl font-semibold text-white">{title}</h3>
-        {description ? <p className="mt-2 text-sm leading-6 text-slate-400">{description}</p> : null}
+
+        {eyebrow ? (
+          <p
+            className="
+              text-xs
+              uppercase
+              tracking-[0.30em]
+              text-cyan-200/70
+            "
+          >
+            {eyebrow}
+          </p>
+        ) : null}
+
+        <h3
+          className="
+            mt-2
+            font-display
+            text-2xl
+            font-semibold
+            text-white
+          "
+        >
+          {title}
+        </h3>
+
+        {description ? (
+          <p
+            className="
+              mt-3
+              max-w-3xl
+              text-sm
+              leading-7
+              text-white/75
+            "
+          >
+            {description}
+          </p>
+        ) : null}
+
       </div>
-      {action ? <div>{action}</div> : null}
+
+      {action ? (
+        <div className="shrink-0">
+          {action}
+        </div>
+      ) : null}
+
     </div>
   )
 }

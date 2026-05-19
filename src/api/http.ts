@@ -1,18 +1,17 @@
 import axios from 'axios'
 
-const baseURL = (
-  import.meta.env.VITE_API_BASE_URL ??
-  'https://electricai-production-5b6a.up.railway.app'
-).replace(/\/$/, '')
+import { apiConfig } from '@/api/config'
+
+const baseURL = apiConfig.baseUrl
 
 export const http = axios.create({
   baseURL,
-  
+  timeout: 0,
 })
 
 export const fileHttp = axios.create({
   baseURL,
- 
+  timeout: 0,
   responseType: 'blob',
 })
 

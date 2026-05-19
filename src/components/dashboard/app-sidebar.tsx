@@ -1,6 +1,13 @@
-import { BarChart3, FileClock, FileScan, Home, Sparkles } from 'lucide-react'
+import {
+  BarChart3,
+  FileClock,
+  FileScan,
+  Home,
+  Sparkles,
+} from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 
+import { useAuth } from '@/auth/use-auth'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
@@ -13,28 +20,82 @@ const navigation = [
 ]
 
 export function AppSidebar() {
+  const auth = useAuth()
+
   return (
     <aside className="hidden w-[300px] shrink-0 xl:block">
       <div className="sticky top-4 flex flex-col gap-5">
-        <Card className="overflow-hidden">
+
+        {/* Main Sidebar Card */}
+        <Card
+          className="
+            overflow-hidden
+            rounded-[32px]
+            border
+            border-white/10
+            bg-[#6d8fd0]/20
+            shadow-[0_8px_40px_rgba(0,0,0,0.12)]
+            backdrop-blur-md
+          "
+        >
           <CardContent className="space-y-6 p-6">
+
+            {/* Logo */}
             <div className="flex items-center gap-4">
-              <div className="flex h-14 w-14 items-center justify-center rounded-3xl bg-sky-400/15 text-sky-200 shadow-glow">
+              <div
+                className="
+                  flex
+                  h-14
+                  w-14
+                  items-center
+                  justify-center
+                  rounded-3xl
+                  bg-[#7fb4dc]/25
+                  text-cyan-100
+                "
+              >
                 <Sparkles className="h-7 w-7" />
               </div>
+
               <div>
-                <p className="font-display text-xl font-semibold text-white">ElectricAI</p>
-                <p className="text-sm text-slate-400">Drawing Analyzer</p>
+                <p className="font-display text-xl font-semibold text-white">
+                  ElectricAI
+                </p>
+
+                <p className="text-sm text-white/70">
+                  {auth.user?.name ?? 'Drawing Analyzer'}
+                </p>
               </div>
             </div>
 
-            <div className="rounded-[24px] border border-sky-300/15 bg-sky-400/8 p-4">
-              <Badge>AI Pipeline</Badge>
-              <p className="mt-3 text-sm leading-6 text-slate-200">
-                Upload electrical PDFs, trigger OCR + AI extraction, inspect component counts, and export BOQ outputs.
+            {/* Pipeline Box */}
+            <div
+              className="
+                rounded-[24px]
+                border
+                border-white/10
+                bg-[#7394cf]/18
+                p-4
+              "
+            >
+              <Badge
+                className="
+                  border
+                  border-white/10
+                  bg-white/10
+                  text-white
+                "
+              >
+                AI Pipeline
+              </Badge>
+
+              <p className="mt-3 text-sm leading-7 text-white/85">
+                Upload electrical PDFs, trigger OCR + AI extraction,
+                inspect component counts, and export BOQ outputs.
               </p>
             </div>
 
+            {/* Navigation */}
             <nav className="space-y-2">
               {navigation.map((item) => (
                 <NavLink
@@ -42,8 +103,28 @@ export function AppSidebar() {
                   to={item.to}
                   className={({ isActive }) =>
                     cn(
-                      'flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition-all',
-                      isActive ? 'bg-sky-300 text-slate-950 shadow-glow' : 'text-slate-300 hover:bg-white/6 hover:text-white',
+                      `
+                      flex
+                      items-center
+                      gap-3
+                      rounded-2xl
+                      px-4
+                      py-3
+                      text-sm
+                      transition-all
+                      duration-200
+                    `,
+                      isActive
+                        ? `
+                          bg-[#78c7f1]
+                          text-[#0a1d35]
+                          font-semibold
+                        `
+                        : `
+                          text-white/80
+                          hover:bg-white/8
+                          hover:text-white
+                        `,
                     )
                   }
                 >
@@ -55,22 +136,60 @@ export function AppSidebar() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="space-y-4 p-6">
+        {/* Bottom Card */}
+        <Card
+          className="
+            rounded-[32px]
+            border
+            border-white/10
+            bg-[#6d8fd0]/20
+            backdrop-blur-md
+          "
+        >
+          <CardContent className="space-y-5 p-6">
+
             <div className="flex items-center gap-3">
-              <div className="rounded-2xl bg-white/6 p-3 text-sky-200">
+
+              <div
+                className="
+                  rounded-2xl
+                  bg-[#7fb4dc]/25
+                  p-3
+                  text-cyan-100
+                "
+              >
                 <BarChart3 className="h-5 w-5" />
               </div>
+
               <div>
-                <p className="font-medium text-white">Results workspace</p>
-                <p className="text-sm text-slate-400">Open the analyzer and process a new project.</p>
+                <p className="font-medium text-white">
+                  Results workspace
+                </p>
+
+                <p className="text-sm text-white/70">
+                  Open the analyzer and process a new project.
+                </p>
               </div>
             </div>
-            <Button asChild className="w-full">
-              <NavLink to="/upload">Start new analysis</NavLink>
+
+            <Button
+              asChild
+              className="
+                h-12
+                w-full
+                bg-[#38d7ff]
+                font-semibold
+                text-black
+                hover:bg-[#58e0ff]
+              "
+            >
+              <NavLink to="/upload">
+                Start new analysis
+              </NavLink>
             </Button>
           </CardContent>
         </Card>
+
       </div>
     </aside>
   )

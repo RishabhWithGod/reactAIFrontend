@@ -8,7 +8,9 @@ export type AnalysisStage =
   | 'symbol_detection'
   | 'quantity_counting'
   | 'boq_generation'
+  | 'cost_estimation'
   | 'complete'
+  | 'cancelled'
   | 'error'
 
 export interface AnalysisStatusUpdate {
@@ -94,4 +96,5 @@ export interface UploadRouteState {
   file?: File
   previewUrl?: string
   drawingName?: string
+  notes?: string
 }

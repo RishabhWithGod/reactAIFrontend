@@ -1,4 +1,4 @@
-import { startTransition, useEffect, useEffectEvent, useState } from 'react'
+import { startTransition, useCallback, useEffect, useEffectEvent, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 
@@ -15,6 +15,7 @@ interface UseAnalysisPollingArgs {
 
 interface UseAnalysisPollingState {
   isRunning: boolean
+  isCancelled: boolean
   status: AnalysisStatusUpdate
   record: AnalysisRecord | null
   error: string | null
@@ -31,18 +32,35 @@ export function useAnalysisPolling({ analysisId, file, previewUrl }: UseAnalysis
   const navigate = useNavigate()
   const [state, setState] = useState<UseAnalysisPollingState>({
     isRunning: Boolean(file),
+    isCancelled: false,
     status: initialStatus,
     record: null,
     error: null,
   })
+  const cancelledRef = useRef(false)
 
   const applyStatus = useEffectEvent((status: AnalysisStatusUpdate) => {
     setState((current) => ({
       ...current,
       status,
-      isRunning: status.stage !== 'complete' && status.stage !== 'error',
+      isRunning: !current.isCancelled && status.stage !== 'complete' && status.stage !== 'error',
     }))
   })
+
+  const cancel = useCallback(() => {
+    cancelledRef.current = true
+    setState((current) => ({
+      ...current,
+      isRunning: false,
+      isCancelled: true,
+      status: {
+        stage: 'cancelled',
+        progress: current.status.progress,
+        label: 'Process cancelled',
+        detail: 'The local workflow was cancelled. Start a new upload when you are ready.',
+      },
+    }))
+  }, [])
 
   useEffect(() => {
     if (!file) {
@@ -50,6 +68,7 @@ export function useAnalysisPolling({ analysisId, file, previewUrl }: UseAnalysis
     }
 
     let active = true
+    cancelledRef.current = false
 
     const run = async () => {
       toast.info(`Starting AI analysis for ${file.name}`)
@@ -61,7 +80,7 @@ export function useAnalysisPolling({ analysisId, file, previewUrl }: UseAnalysis
           }
         })
 
-        if (!active) {
+        if (!active || cancelledRef.current) {
           return
         }
 
@@ -70,6 +89,7 @@ export function useAnalysisPolling({ analysisId, file, previewUrl }: UseAnalysis
 
         setState({
           isRunning: false,
+          isCancelled: false,
           status: {
             stage: 'complete',
             progress: 100,
@@ -90,12 +110,13 @@ export function useAnalysisPolling({ analysisId, file, previewUrl }: UseAnalysis
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Analysis failed unexpectedly.'
 
-        if (!active) {
+        if (!active || cancelledRef.current) {
           return
         }
 
         setState({
           isRunning: false,
+          isCancelled: false,
           status: {
             stage: 'error',
             progress: 100,
@@ -117,5 +138,5 @@ export function useAnalysisPolling({ analysisId, file, previewUrl }: UseAnalysis
     }
   }, [analysisId, file, navigate, previewUrl])
 
-  return state
+  return { ...state, cancel }
 }
