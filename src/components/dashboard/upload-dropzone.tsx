@@ -30,7 +30,7 @@ interface UploadDropzoneProps {
 
 const acceptedExtensions = ['pdf', 'cad', 'dwg', 'bim']
 
-const maxFileSize = 50 * 1024 * 1024
+// const maxFileSize = 50 * 1024 * 1024
 
 function isSupportedFile(file: File) {
   const extension = file.name
@@ -38,12 +38,9 @@ function isSupportedFile(file: File) {
     .pop()
     ?.toLowerCase()
 
-  return (
-    Boolean(
-      extension &&
-        acceptedExtensions.includes(extension),
-    ) &&
-    file.size <= maxFileSize
+  return Boolean(
+    extension &&
+    acceptedExtensions.includes(extension)
   )
 }
 
@@ -57,47 +54,44 @@ export function UploadDropzone({
   onSelect,
   onRemove,
 }: UploadDropzoneProps) {
-  const {
-    getRootProps,
-    getInputProps,
-    isDragActive,
-    open,
-  } = useDropzone({
-    accept: {
-      'application/pdf': ['.pdf'],
-      'application/octet-stream': [
-        '.cad',
-        '.dwg',
-        '.bim',
-      ],
-    },
-    multiple: true,
-    noClick: true,
-    disabled: isBusy,
+ const {
+  getRootProps,
+  getInputProps,
+  isDragActive,
+  open,
+} = useDropzone({
+  accept: {
+    'application/pdf': ['.pdf'],
+    'application/octet-stream': [
+      '.cad',
+      '.dwg',
+      '.bim',
+    ],
+  },
+  multiple: true,
+  noClick: true,
+  disabled: isBusy,
 
-    onDropAccepted: (files) => {
-      const validFiles =
-        files.filter(isSupportedFile)
+  onDropAccepted: (files) => {
+    const validFiles = files.filter(isSupportedFile)
 
-      if (
-        validFiles.length !== files.length
-      ) {
-        toast.error(
-          'Only PDF, CAD, DWG and BIM files up to 50 MB are supported.',
-        )
-      }
-
-      if (validFiles.length) {
-        onSelect(validFiles)
-      }
-    },
-
-    onDropRejected: () => {
+    if (validFiles.length !== files.length) {
       toast.error(
-        'Only PDF, CAD, DWG and BIM files up to 50 MB are supported.',
+        'Only PDF, CAD, DWG and BIM files are supported.',
       )
-    },
-  })
+    }
+
+    if (validFiles.length) {
+      onSelect(validFiles)
+    }
+  },
+
+  onDropRejected: () => {
+    toast.error(
+      'Only PDF, CAD, DWG and BIM files are supported.',
+    )
+  },
+})
 
   return (
     <Card

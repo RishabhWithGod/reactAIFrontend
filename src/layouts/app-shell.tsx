@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
 import { Outlet } from 'react-router-dom'
 
-import { AppHeader } from '@/components/dashboard/app-header'
+// import { AppHeader } from '@/components/dashboard/app-header'
 import { AppSidebar } from '@/components/dashboard/app-sidebar'
 
 export function AppShell() {
@@ -20,7 +20,7 @@ export function AppShell() {
         <div className="flex min-w-0 flex-1 flex-col gap-6">
 
           {/* Header */}
-          <AppHeader />
+          {/* <AppHeader /> */}
 
           {/* Page Content */}
           <motion.main

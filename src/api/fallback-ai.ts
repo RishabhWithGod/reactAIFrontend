@@ -251,6 +251,7 @@ function deterministicGeneratedAt(seed: number) {
   return new Date(base + offset).toISOString()
 }
 
+
 function scaledQuantity(
   random: () => number,
   spec: SyntheticComponentSpec,

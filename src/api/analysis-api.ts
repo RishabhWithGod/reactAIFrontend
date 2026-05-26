@@ -21,7 +21,7 @@ import {
   normalizePipelineAnalysisResponse,
 } from '@/utils/result-adapter'
 
-const BACKEND_REQUEST_TIMEOUT_MS = 60_000
+const BACKEND_REQUEST_TIMEOUT_MS = 600_000
 
 const pipelineStages: AnalysisStatusUpdate[] = [
   {
@@ -108,7 +108,7 @@ async function uploadLegacyDrawing(
 
   try {
     const response = await http.post(
-      '/api/upload',
+      `${apiConfig.baseUrl}/api/upload-ai`,
       makeFormData(file),
       {
         timeout: BACKEND_REQUEST_TIMEOUT_MS,

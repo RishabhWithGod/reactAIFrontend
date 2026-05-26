@@ -4,6 +4,7 @@ import {
   FileScan,
   Home,
   Sparkles,
+  LogOut
 } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 
@@ -17,6 +18,7 @@ const navigation = [
   { to: '/', label: 'Overview', icon: Home },
   { to: '/upload', label: 'Upload', icon: FileScan },
   { to: '/history', label: 'History', icon: FileClock },
+  // { to: '/Logout', label: 'Logout', icon: FileClock },
 ]
 
 export function AppSidebar() {
@@ -86,11 +88,11 @@ export function AppSidebar() {
                   text-white
                 "
               >
-                AI Pipeline
+                Breeze AI
               </Badge>
 
               <p className="mt-3 text-sm leading-7 text-white/85">
-                Upload electrical PDFs, trigger OCR + AI extraction,
+                Upload electrical PDFs,trigger AI extraction,
                 inspect component counts, and export BOQ outputs.
               </p>
             </div>
@@ -132,6 +134,17 @@ export function AppSidebar() {
                   {item.label}
                 </NavLink>
               ))}
+              <Button
+              variant="ghost"
+              onClick={auth.logout}
+              className="
+                text-white
+                hover:bg-white/10
+              "
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              Logout
+            </Button>
             </nav>
           </CardContent>
         </Card>

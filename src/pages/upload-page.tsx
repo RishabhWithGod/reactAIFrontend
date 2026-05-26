@@ -1,4 +1,5 @@
-import { ArrowRight, BookOpen, CheckCircle2, DatabaseZap, FileImage, Headphones, Info, Trash2, Video, Workflow } from 'lucide-react'
+// import { ArrowRight, BookOpen, CheckCircle2, DatabaseZap, FileImage, Headphones, Info, Trash2, Video, Workflow } from 'lucide-react'
+import { ArrowRight,   Info, Trash2,  } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -7,7 +8,7 @@ import { DrawingPreview } from '@/components/dashboard/drawing-preview'
 import { PageShell } from '@/components/dashboard/page-shell'
 import { UploadDropzone } from '@/components/dashboard/upload-dropzone'
 import { TextArea } from '@/components/forms/form-field'
-import { Badge } from '@/components/ui/badge'
+// import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 
@@ -19,7 +20,7 @@ export function UploadPage() {
   const navigate = useNavigate()
   const [files, setFiles] = useState<File[]>([])
   const [notes, setNotes] = useState('')
-  const [uploadProgress, setUploadProgress] = useState(0)
+  // const [uploadProgress, setUploadProgress] = useState(0)
   const [previewUrl, setPreviewUrl] = useState<string>()
   const primaryFile = files[0] ?? null
 
@@ -33,13 +34,13 @@ export function UploadPage() {
 
   useEffect(() => {
     if (!files.length) {
-      setUploadProgress(0)
+      // setUploadProgress(0)
       return
     }
 
-    setUploadProgress(12)
+    // setUploadProgress(12)
     const timer = window.setInterval(() => {
-      setUploadProgress((current) => Math.min(100, current + 14))
+      // setUploadProgress((current) => Math.min(100, current + 14))
     }, 180)
 
     return () => window.clearInterval(timer)
@@ -197,7 +198,7 @@ export function UploadPage() {
         </div>    
       </div>
 
-      <div className="mt-10 mb-5 grid gap-8 lg:grid-cols-3">
+      {/* <div className="mt-10 mb-5 grid gap-8 lg:grid-cols-3">
         <Card
               className="
                 h-full
@@ -261,8 +262,8 @@ export function UploadPage() {
             </p>
           </CardContent>
         </Card>
-      </div>
-
+      </div> */}
+{/* 
       <Card
             className="
               h-full
@@ -291,9 +292,9 @@ export function UploadPage() {
             <div className="h-full rounded-full bg-gradient-to-r from-sky-400 to-cyan-200 transition-all" style={{ width: `${uploadProgress}%` }} />
           </div>
         </CardContent>
-      </Card>
+      </Card> */}
 
-      <Card
+      {/* <Card
           className="
             h-full
             mb-5
@@ -326,9 +327,9 @@ export function UploadPage() {
             ))}
           </div>
         </CardContent>
-      </Card>
+      </Card> */}
 
-      <div className="grid gap-4 md:grid-cols-3">
+      {/* <div className="grid gap-4 md:grid-cols-3">
         {[
           { icon: BookOpen, title: 'Documentation', text: 'View comprehensive guides on using AI Takeoff.' },
           { icon: Video, title: 'Tutorial Videos', text: 'Watch step-by-step tutorials on file preparation.' },
@@ -354,7 +355,7 @@ export function UploadPage() {
             </CardContent>
           </Card>
         ))}
-      </div>
+      </div> */}
     </PageShell>
   )
 }

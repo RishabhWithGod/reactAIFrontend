@@ -1,4 +1,5 @@
-import { ArrowUpRight, Copy, FileText, MoreHorizontal, Search, Trash2 } from 'lucide-react'
+import { ArrowUpRight, Copy, FileText,  Search, Trash2 } from 'lucide-react'
+// import { ArrowUpRight, Copy, FileText, MoreHorizontal, Search, Trash2 } from 'lucide-react'
 import { useDeferredValue, useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -300,7 +301,7 @@ export function HistoryPage() {
         </div>
       </div>
 
-      <Card   
+      {/* <Card   
       className="
             rounded-[32px]
             border
@@ -327,7 +328,7 @@ export function HistoryPage() {
             </div>
           ))}
         </CardContent>
-      </Card>
+      </Card> */}
     </PageShell>
   )
 }

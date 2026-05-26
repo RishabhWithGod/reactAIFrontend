@@ -23,8 +23,8 @@ export default defineConfig({
     proxy: {
       '/api': {
         target:
-          'https://electricai-production-5b6a.up.railway.app',
-
+          'https://api.splitreef.com',
+          // 'https://electricai-production-5b6a.up.railway.app',
         changeOrigin: true,
         secure: true,
       },
